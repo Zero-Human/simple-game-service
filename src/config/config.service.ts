@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { BossRaidHistory } from 'src/bossRaid/entity/boss-raid-history.entity';
 import { User } from 'src/user/entity/user.entity';
-// import { Post } from 'src/posts/entity/post.entity';
 
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
