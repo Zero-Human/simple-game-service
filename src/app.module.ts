@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MySqlConfigModule } from './config/config.module';
 import { MySqlConfigService } from './config/config.service';
 import { HttpModule } from '@nestjs/axios';
-
+import * as Joi from 'joi';
 @Module({
   imports: [
     UserModule,
@@ -14,6 +14,17 @@ import { HttpModule } from '@nestjs/axios';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('dev', 'test').required(),
+        DB_USER: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_PORT: Joi.number().required(),
+        DB_HOST: Joi.string().required(),
+        DB_SCHEMA: Joi.string().required(),
+        SYNCHRONIZE: Joi.boolean().required(),
+        LOGGING: Joi.boolean().required(),
+        TIMEZONE: Joi.string().required(),
+      }),
     }),
     HttpModule.register({
       timeout: 5000,
