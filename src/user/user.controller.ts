@@ -14,7 +14,7 @@ export class UserController {
   }
   @Get('/:id')
   async getUser(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.userService.GetUserById(id);
+    const user = await this.userService.getUserById(id);
     return Object.assign({
       totalScore: user.totalScore,
       bossRaidHistory: user.bossRaidHistory,

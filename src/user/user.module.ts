@@ -21,5 +21,6 @@ const UserRepositoryProvider = {
   imports: [TypeOrmModule.forFeature([User])],
   providers: [UserService, UserRepositoryProvider],
   controllers: [UserController],
+  exports: [UserService],
 })
 export class UserModule {}

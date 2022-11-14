@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RaidController } from './raid.controller';
+import { BossRaidController } from './boss-raid.controller';
 
-describe('RaidController', () => {
-  let controller: RaidController;
+describe('BossRaidController', () => {
+  let controller: BossRaidController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [RaidController],
+      controllers: [BossRaidController],
     }).compile();
 
-    controller = module.get<RaidController>(RaidController);
+    controller = module.get<BossRaidController>(BossRaidController);
   });
 
   it('should be defined', () => {

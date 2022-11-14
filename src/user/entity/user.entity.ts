@@ -1,4 +1,4 @@
-import { BossRaidHistory } from 'src/raid/entity/boss-raid-history.entity';
+import { BossRaidHistory } from 'src/bossRaid/entity/boss-raid-history.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
