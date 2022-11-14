@@ -18,8 +18,8 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_SCHEMA'),
       entities: [BossRaidHistory, User],
-      synchronize: this.configService.get<boolean>('SYNCHRONIZE'),
-      logging: this.configService.get<boolean>('LOGGING'),
+      synchronize: Boolean(this.configService.get<boolean>('SYNCHRONIZE')),
+      logging: Boolean(this.configService.get<boolean>('LOGGING')),
       timezone: this.configService.get<string>('TIMEZONE'),
     };
   }
