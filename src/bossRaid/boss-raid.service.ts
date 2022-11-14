@@ -14,11 +14,13 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { RankingInfo } from './interface/ranking-info.interface';
 
 @Injectable()
 export class BossRaidService {
   private readonly DATA_URL: string;
   private readonly CONERT_SECOND: number;
+  private readonly RANKING_KEY: string;
   private bossRaidLimitSeconds: number;
   private levels: Array<object>;
   constructor(
@@ -30,6 +32,7 @@ export class BossRaidService {
   ) {
     this.DATA_URL = `https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json`;
     this.CONERT_SECOND = 1000;
+    this.RANKING_KEY = 'rank';
     firstValueFrom(httpService.get(this.DATA_URL)).then((data) => {
       this.bossRaidLimitSeconds = data.data.bossRaids[0].bossRaidLimitSeconds;
       this.levels = data.data.bossRaids[0].levels;
@@ -121,7 +124,7 @@ export class BossRaidService {
         totalScore,
       );
       await this.redis.zadd(
-        'rank',
+        this.RANKING_KEY,
         totalScore,
         JSON.stringify({
           userId: enterUser.user.id,
@@ -134,6 +137,47 @@ export class BossRaidService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getBossRaidRanking(userId: number) {
+    const user = await this.userService.getUserById(userId);
+    if (!user) {
+      throw new BadRequestException('없는 유저입니다.');
+    }
+
+    const data = await this.redis.zrevrange(
+      this.RANKING_KEY,
+      0,
+      -1,
+      'WITHSCORES',
+    );
+
+    const topRankerInfoList: RankingInfo[] = [];
+    data.filter((value, index) => {
+      const ranking = Math.floor(index / 2);
+      if (index % 2 === 0) {
+        const rankinginfo: RankingInfo = {
+          ranking: ranking,
+          userId: parseInt(JSON.parse(value).userId),
+          totalScore: 0,
+        };
+        topRankerInfoList.push(rankinginfo);
+      } else {
+        topRankerInfoList[ranking].totalScore = parseInt(value);
+      }
+    });
+    const myRankingInfo: RankingInfo = {
+      ranking: await this.redis.zrevrank(
+        this.RANKING_KEY,
+        JSON.stringify({ userId }),
+      ),
+      userId,
+      totalScore: parseInt(
+        await this.redis.zscore(this.RANKING_KEY, JSON.stringify({ userId })),
+      ),
+    };
+
+    return { topRankerInfoList, myRankingInfo };
   }
 
   isTimeOver(enterTime: Date) {

@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { BossRaidService } from './boss-raid.service';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
@@ -19,6 +26,11 @@ export class BossRaidController {
   @Patch('/end')
   async endBossRaid(@Body() endBossRaidDto: EndBossRaidDto) {
     const result = this.bossRaidService.endBossRaid(endBossRaidDto);
+    return result;
+  }
+  @Get('/topRankerList')
+  async getBossRaidRank(@Body('userId', ParseIntPipe) userId: number) {
+    const result = this.bossRaidService.getBossRaidRanking(userId);
     return result;
   }
 }
