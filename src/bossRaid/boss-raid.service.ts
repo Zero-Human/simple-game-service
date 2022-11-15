@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -109,7 +110,7 @@ export class BossRaidService {
     const queryRunner =
       this.bossRaidRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction();
     try {
       await queryRunner.manager.update(
         BossRaidHistory,
@@ -119,10 +120,6 @@ export class BossRaidService {
           score,
         },
       );
-      await this.userService.updateUserTotalScore(
-        enterUser.user.id,
-        totalScore,
-      );
       await this.redis.zadd(
         this.RANKING_KEY,
         totalScore,
@@ -130,10 +127,14 @@ export class BossRaidService {
           userId: enterUser.user.id,
         }),
       );
+      await this.userService.updateUserTotalScore(
+        enterUser.user.id,
+        totalScore,
+      );
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
     }

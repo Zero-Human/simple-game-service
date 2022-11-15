@@ -32,7 +32,7 @@ export class UserService {
     const queryRunner =
       this.userRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction();
     try {
       await queryRunner.manager.update(User, userId, {
         totalScore,
