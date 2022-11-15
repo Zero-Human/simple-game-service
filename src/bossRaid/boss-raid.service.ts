@@ -1,12 +1,12 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/user.service';
-import { IsNull } from 'typeorm';
-import { BossRaidRepository } from './boss-raid.repository';
+import { IsNull, Repository } from 'typeorm';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
@@ -25,7 +25,8 @@ export class BossRaidService {
   private levels: Array<object>;
   constructor(
     @InjectRepository(BossRaidHistory)
-    private readonly bossRaidRepository: BossRaidRepository,
+    private readonly bossRaidRepository: Repository<BossRaidHistory>,
+
     private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
     private readonly httpService: HttpService,
@@ -109,7 +110,7 @@ export class BossRaidService {
     const queryRunner =
       this.bossRaidRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction();
     try {
       await queryRunner.manager.update(
         BossRaidHistory,
@@ -119,10 +120,6 @@ export class BossRaidService {
           score,
         },
       );
-      await this.userService.updateUserTotalScore(
-        enterUser.user.id,
-        totalScore,
-      );
       await this.redis.zadd(
         this.RANKING_KEY,
         totalScore,
@@ -130,10 +127,14 @@ export class BossRaidService {
           userId: enterUser.user.id,
         }),
       );
+      await this.userService.updateUserTotalScore(
+        enterUser.user.id,
+        totalScore,
+      );
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
     }
