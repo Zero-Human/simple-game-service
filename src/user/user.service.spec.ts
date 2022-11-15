@@ -4,8 +4,7 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BossRaidHistory } from 'src/bossRaid/entity/boss-raid-history.entity';
-import { getConnection, QueryRunner, Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { UserService } from './user.service';
 const qr = {
@@ -18,12 +17,6 @@ const qr = {
   rollbackTransaction: jest.fn(),
 } as unknown as QueryRunner;
 
-class ConnectionMock {
-  // 2
-  createQueryRunner(mode?: 'master' | 'slave'): QueryRunner {
-    return qr;
-  }
-}
 const mockPostRepository = () => ({
   create: jest.fn(() => {
     return {
@@ -123,7 +116,6 @@ describe('UserService', () => {
     const totalScore = 100;
 
     const queryRunner = spyRepository.manager.connection.createQueryRunner();
-    // queryRunner.manager.update = null;
 
     jest
       .spyOn(queryRunner.manager, 'update')
