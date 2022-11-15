@@ -8,7 +8,6 @@ import { QueryRunner, Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { UserService } from './user.service';
 const qr = {
-  // 1
   manager: { update: jest.fn() },
   connect: jest.fn(),
   startTransaction: jest.fn(),
