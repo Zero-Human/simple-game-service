@@ -29,6 +29,7 @@ export class BossRaidService {
 
     private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
+
     private readonly httpService: HttpService,
   ) {
     this.DATA_URL = `https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json`;
@@ -36,22 +37,27 @@ export class BossRaidService {
     this.RANKING_KEY = 'rank';
     this.BOSS_RAID_LIMIT_SECONDS_KEY = 'bossRaidLimitSeconds';
     this.BOSS_RAID_LEVELS_KEY = 'levels';
-    this.getBossRaidInfo();
+    (async () => {
+      await this.getBossRaidInfo();
+    })();
   }
   async getBossRaidInfo() {
-    firstValueFrom(this.httpService.get(this.DATA_URL)).then((data) => {
-      const bossRaidLimitSeconds = data.data.bossRaids[0].bossRaidLimitSeconds;
-      const levels = data.data.bossRaids[0].levels;
-      this.redis.set(this.BOSS_RAID_LIMIT_SECONDS_KEY, bossRaidLimitSeconds);
-      this.redis.set(this.BOSS_RAID_LEVELS_KEY, JSON.stringify(levels));
-    });
+    await firstValueFrom(this.httpService.get(this.DATA_URL)).then(
+      async (data) => {
+        const bossRaidLimitSeconds =
+          data.data.bossRaids[0].bossRaidLimitSeconds;
+        const levels = data.data.bossRaids[0].levels;
+        await this.redis.set(
+          this.BOSS_RAID_LIMIT_SECONDS_KEY,
+          bossRaidLimitSeconds,
+        );
+        await this.redis.set(this.BOSS_RAID_LEVELS_KEY, JSON.stringify(levels));
+      },
+    );
   }
 
   async enter(enterBossRaidDto: EnterBossRaidDto) {
     const user = await this.userService.getUserById(enterBossRaidDto.userId);
-    if (!user) {
-      throw new BadRequestException('없는 유저입니다.');
-    }
     if (!(await this.isBossRaidLevel(enterBossRaidDto.level))) {
       throw new BadRequestException('level 설정이 잘못되었습니다.');
     }
@@ -68,12 +74,13 @@ export class BossRaidService {
     const queryRunner =
       this.bossRaidRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction();
     try {
       await queryRunner.manager.save(data);
       await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
     } finally {
       queryRunner.release();
     }

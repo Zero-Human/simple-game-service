@@ -14,7 +14,7 @@ import { BossRaidHistory } from './entity/boss-raid-history.entity';
 import { HttpModule } from '@nestjs/axios';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 const qr = {
-  manager: { update: jest.fn() },
+  manager: { update: jest.fn(), save: jest.fn() },
   connect: jest.fn(),
   startTransaction: jest.fn(),
   commitTransaction: jest.fn(),
@@ -122,20 +122,27 @@ describe('BossRaidService', () => {
   });
 
   it('enter() - 성공', async () => {
+    const user: User = {
+      id: 1,
+      totalScore: 100,
+      bossRaidHistory: null,
+    };
     const enterBossRaidDto: EnterBossRaidDto = {
       userId: 1,
       level: 1,
     };
-    const user: User = {
-      id: 1,
-      totalScore: 1,
-      bossRaidHistory: null,
-    };
+    const queryRunner = spyRepository.manager.connection.createQueryRunner();
     spyUserService.getUserById = jest.fn(async () => {
       return user;
     });
+
     const result = await service.enter(enterBossRaidDto);
 
+    expect(queryRunner.connect).toHaveBeenCalled();
+    expect(queryRunner.startTransaction).toHaveBeenCalled();
+    expect(queryRunner.manager.save).toHaveBeenCalled();
+    expect(queryRunner.commitTransaction).toHaveBeenCalled();
+    expect(queryRunner.release).toHaveBeenCalled();
     expect(spyUserService.getUserById).toHaveBeenCalled();
     expect(spyUserService.getUserById).toHaveBeenCalledWith(
       enterBossRaidDto.userId,
