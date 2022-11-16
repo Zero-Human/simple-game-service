@@ -141,10 +141,11 @@ totalScore: number;
 
 
 ## Test 결과
-![image](https://user-images.githubusercontent.com/70467297/201925335-04c5f98f-cbb3-4b66-8d1b-ab368c45fcc9.png)
-> 현재 userContoller, userService, bossRaidContoller까지 유닛테스트 진행<br>
-> 추후 bossRaidService 및 통합테스트 작업예정
+### 유닛 테스트
+<img src="https://user-images.githubusercontent.com/70467297/202202682-33dd7541-e0d6-4b54-8cef-f793a8e91af7.png"   height="230"/>
 
+### 통합 테스트 
+<img src="https://user-images.githubusercontent.com/70467297/202202802-1f9b3cf5-63b5-4e76-960b-84700bed62ac.png"   height="700"/>
 
 ## 설치 및 실행 방법
 nodejs와 npm이 install 되어있지 않다면 먼저 install 과정 진행
