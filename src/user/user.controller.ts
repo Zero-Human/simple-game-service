@@ -12,6 +12,7 @@ export class UserController {
       userId,
     });
   }
+
   @Get('/:id')
   async getUser(@Param('id', ParseIntPipe) id: number) {
     const user = await this.userService.getUserById(id);

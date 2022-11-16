@@ -18,6 +18,7 @@ export class UserService {
     await this.userRepository.save(user);
     return user.id;
   }
+
   async getUserById(id: number) {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -28,6 +29,7 @@ export class UserService {
     }
     return user;
   }
+
   async updateUserTotalScore(userId: number, totalScore: number) {
     const queryRunner =
       this.userRepository.manager.connection.createQueryRunner();
