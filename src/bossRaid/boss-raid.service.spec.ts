@@ -116,7 +116,7 @@ describe('BossRaidService', () => {
       ],
     }).compile();
     spyRedis = module.get<Redis>(getRedisToken(DEFAULT_REDIS_NAMESPACE));
-    service = await module.get<BossRaidService>(BossRaidService);
+    service = module.get<BossRaidService>(BossRaidService);
     spyRepository = module.get(getRepositoryToken(BossRaidHistory));
     spyUserService = module.get<UserService>(UserService);
   });
