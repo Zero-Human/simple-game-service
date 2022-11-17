@@ -145,7 +145,7 @@ totalScore: number;
 <img src="https://user-images.githubusercontent.com/70467297/202202682-33dd7541-e0d6-4b54-8cef-f793a8e91af7.png"   height="230"/>
 
 ### 통합 테스트 
-<img src="https://user-images.githubusercontent.com/70467297/202202802-1f9b3cf5-63b5-4e76-960b-84700bed62ac.png"   height="700"/>
+<img src="https://user-images.githubusercontent.com/70467297/202340096-7c1d866e-4061-4119-9060-b809715c2f94.png"   height="700"/>
 
 ## 설치 및 실행 방법
 nodejs와 npm이 install 되어있지 않다면 먼저 install 과정 진행
