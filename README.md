@@ -7,6 +7,7 @@
       - [ DB-Modeling](#db-modeling)
       - [ API 문서](#api-문서)
   * [프로젝트 기능 구현내용](#구현-기능-관련)
+  * [배포](#배포)
   * [Test 결과](#test-결과)
   * [설치 및 실행 방법](#설치-및-실행-방법)
 
@@ -23,6 +24,7 @@
 - Framework: nest.js
 - ORM : typeorm
 - DB : mysql, redis
+- AWS : EC2
 
 
 ## DB Modeling
@@ -137,6 +139,12 @@ totalScore: number;
   - joi를 이용하여 환경변수의 유효성을 검사하였습니다.
   - class-validator, class-transformer 및 pipe기능으로 body나 Path 변수의 유효성을 검사하였습니다.
   - Exception filter와 winston을 이용하여 에러 로그를 만들었고 날짜별로 구분하여 로그를 작성하도록 하였습니다.
+
+## 배포
+ - EC2 ubuntu로 배포
+ - 주소: http://13.125.37.104:3000/
+ - EC2에 Mysql과 Redis를 설치하여 진행하였음
+ ![image](https://user-images.githubusercontent.com/70467297/202777907-beb457f3-87ac-440d-9e8d-9dfd022460bd.png)
 
 
 
