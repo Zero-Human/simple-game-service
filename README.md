@@ -144,6 +144,7 @@ totalScore: number;
  - EC2 ubuntu로 배포
  - 주소: http://13.125.37.104:3000/
  - EC2에 Mysql과 Redis를 설치하여 진행하였음
+ - 현재 서버를 중지한 상태입니다.
  ![image](https://user-images.githubusercontent.com/70467297/202777907-beb457f3-87ac-440d-9e8d-9dfd022460bd.png)
 
 
