@@ -139,7 +139,7 @@ totalScore: number;
   - joi를 이용하여 환경변수의 유효성을 검사하였습니다.
   - class-validator, class-transformer 및 pipe기능으로 body나 Path 변수의 유효성을 검사하였습니다.
   - Exception filter와 winston을 이용하여 에러 로그를 만들었고 날짜별로 구분하여 로그를 작성하도록 하였습니다.
-  - 추후 작업 예정 : Jwt로 인증 구현, 매일 00시에 랭킹 20명에게 보상 보내기(메일작업 예정)
+  - 추후 작업 예정 : Jwt로 인증 구현, 매일 00시에 랭킹 20명에게 보상 보내기(메일로 진행 예정)
 ## 배포
  - EC2 ubuntu로 배포
  - 주소: http://13.125.37.104:3000/
