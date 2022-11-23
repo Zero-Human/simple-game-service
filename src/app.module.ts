@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MySqlConfigModule } from './config/config.module';
 import { MySqlConfigService } from './config/config.service';
 import { HttpModule } from '@nestjs/axios';
+import { BatchModule } from './batch/batch.module';
 import * as Joi from 'joi';
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import * as Joi from 'joi';
       useClass: MySqlConfigService,
       inject: [MySqlConfigService],
     }),
+    BatchModule,
   ],
   controllers: [],
   providers: [],

@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AllExceptionFiller } from 'utill/Exception/exception.fillter';
-import { winstonLogger } from 'utill/logger/winston.logger';
+import { AllExceptionFiller } from './utill/Exception/exception.fillter';
+import { winstonLogger } from './utill/logger/winston.logger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

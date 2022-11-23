@@ -79,7 +79,7 @@ export class BossRaidService {
       relations: ['user'],
     });
     if (enterUser) {
-      if (!this.isTimeOver(enterUser.enterTime)) {
+      if (this.isTimeOver(enterUser.enterTime)) {
         return { canEnter: false, enteredUserId: enterUser.user.id };
       }
     }
