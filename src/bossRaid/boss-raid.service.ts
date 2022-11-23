@@ -5,8 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/user.service';
-import { IsNull } from 'typeorm';
-import { BossRaidRepository } from './boss-raid.repository';
+import { IsNull, Repository } from 'typeorm';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
@@ -25,7 +24,7 @@ export class BossRaidService {
   private levels: Array<object>;
   constructor(
     @InjectRepository(BossRaidHistory)
-    private readonly bossRaidRepository: BossRaidRepository,
+    private readonly bossRaidRepository: Repository<BossRaidHistory>,
     private readonly userService: UserService,
     @InjectRedis() private readonly redis: Redis,
     private readonly httpService: HttpService,
