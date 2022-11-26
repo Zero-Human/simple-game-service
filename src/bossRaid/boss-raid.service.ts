@@ -10,11 +10,10 @@ import { IsNull, Repository } from 'typeorm';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import Redis from 'ioredis';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { RankingInfo } from './interface/ranking-info.interface';
+import { RankService } from '../rank/rank.service';
 
 @Injectable()
 export class BossRaidService {
@@ -26,10 +25,8 @@ export class BossRaidService {
   constructor(
     @InjectRepository(BossRaidHistory)
     private readonly bossRaidRepository: Repository<BossRaidHistory>,
-
     private readonly userService: UserService,
-    @InjectRedis() private readonly redis: Redis,
-
+    private readonly rankService: RankService,
     private readonly httpService: HttpService,
   ) {
     this.DATA_URL = `https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json`;
@@ -94,7 +91,7 @@ export class BossRaidService {
       relations: ['user'],
     });
     if (enterUser) {
-      if (!(await this.isTimeOver(enterUser.enterTime))) {
+      if (this.isTimeOver(enterUser.enterTime)) {
         return { canEnter: false, enteredUserId: enterUser.user.id };
       }
     }
@@ -134,13 +131,7 @@ export class BossRaidService {
           score,
         },
       );
-      await this.redis.zadd(
-        this.RANKING_KEY,
-        totalScore,
-        JSON.stringify({
-          userId: enterUser.user.id,
-        }),
-      );
+      await this.rankService.insertRanking(totalScore, enterUser.user.id);
       await this.userService.updateUserTotalScore(
         enterUser.user.id,
         totalScore,
@@ -159,38 +150,12 @@ export class BossRaidService {
     if (!user) {
       throw new BadRequestException('없는 유저입니다.');
     }
+    const topRankerInfoList: RankingInfo[] =
+      await this.rankService.getrankingList(0, -1, true);
 
-    const data = await this.redis.zrevrange(
-      this.RANKING_KEY,
-      0,
-      -1,
-      'WITHSCORES',
-    );
-
-    const topRankerInfoList: RankingInfo[] = [];
-    data.filter((value, index) => {
-      const ranking = Math.floor(index / 2);
-      if (index % 2 === 0) {
-        const rankinginfo: RankingInfo = {
-          ranking: ranking,
-          userId: parseInt(JSON.parse(value).userId),
-          totalScore: 0,
-        };
-        topRankerInfoList.push(rankinginfo);
-      } else {
-        topRankerInfoList[ranking].totalScore = parseInt(value);
-      }
-    });
-    const myRankingInfo: RankingInfo = {
-      ranking: await this.redis.zrevrank(
-        this.RANKING_KEY,
-        JSON.stringify({ userId }),
-      ),
+    const myRankingInfo: RankingInfo = await this.rankService.getranking(
       userId,
-      totalScore: parseInt(
-        await this.redis.zscore(this.RANKING_KEY, JSON.stringify({ userId })),
-      ),
-    };
+    );
 
     return { topRankerInfoList, myRankingInfo };
   }
