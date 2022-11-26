@@ -38,11 +38,11 @@ export class RankService {
     const topRankerInfoList: RankingInfo[] = [];
     data.filter((value, index) => {
       const ranking = Math.floor(index / 2);
-      if (index % 2 === 0) {
+      if (index % 2 === 0 || withScore == false) {
         const rankinginfo: RankingInfo = {
-          ranking: ranking,
+          ranking: withScore ? ranking : index,
           userId: parseInt(JSON.parse(value).userId),
-          totalScore: 0,
+          totalScore: null,
         };
         topRankerInfoList.push(rankinginfo);
       } else {
