@@ -12,7 +12,6 @@ import { DataSource } from 'typeorm';
 import { UserModule } from '../user/user.module';
 import { RankModule } from '../rank/rank.module';
 
-
 const BossRaidRepositoryProvider = {
   provide: getRepositoryToken(BossRaidHistory),
   inject: [getDataSourceToken()],

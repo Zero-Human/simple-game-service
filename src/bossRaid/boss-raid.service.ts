@@ -5,9 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { UserService } from '../user/user.service';
-import { IsNull } from 'typeorm';
+import { UserService } from 'src/user/user.service';
+import { IsNull, Repository } from 'typeorm';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
@@ -26,9 +25,7 @@ export class BossRaidService {
   constructor(
     @InjectRepository(BossRaidHistory)
     private readonly bossRaidRepository: Repository<BossRaidHistory>,
-
     private readonly userService: UserService,
-
     private readonly rankService: RankService,
     private readonly httpService: HttpService,
   ) {
