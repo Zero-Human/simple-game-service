@@ -9,17 +9,15 @@ import {
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
 import { HttpModule } from '@nestjs/axios';
 import { DataSource } from 'typeorm';
-import { customBossRaidRepositoryMethods } from './boss-raid.repository';
 import { UserModule } from '../user/user.module';
 import { RankModule } from '../rank/rank.module';
+
 
 const BossRaidRepositoryProvider = {
   provide: getRepositoryToken(BossRaidHistory),
   inject: [getDataSourceToken()],
   useFactory(dataSource: DataSource) {
-    return dataSource
-      .getRepository(BossRaidHistory)
-      .extend(customBossRaidRepositoryMethods);
+    return dataSource.getRepository(BossRaidHistory);
   },
 };
 @Module({

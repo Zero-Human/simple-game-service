@@ -15,22 +15,21 @@ export class BossRaidController {
   constructor(private readonly bossRaidService: BossRaidService) {}
   @Post('/enter')
   async enterBossRaid(@Body() enterBossRaidDto: EnterBossRaidDto) {
-    const result = this.bossRaidService.enter(enterBossRaidDto);
+    const result = await this.bossRaidService.enter(enterBossRaidDto);
     return result;
   }
   @Get('')
   async getBossRaidStatus() {
-    const result = this.bossRaidService.getBossRaidStatus();
+    const result = await this.bossRaidService.getBossRaidStatus();
     return result;
   }
   @Patch('/end')
   async endBossRaid(@Body() endBossRaidDto: EndBossRaidDto) {
-    const result = this.bossRaidService.endBossRaid(endBossRaidDto);
-    return result;
+    await this.bossRaidService.endBossRaid(endBossRaidDto);
   }
   @Get('/topRankerList')
   async getBossRaidRank(@Body('userId', ParseIntPipe) userId: number) {
-    const result = this.bossRaidService.getBossRaidRanking(userId);
+    const result = await this.bossRaidService.getBossRaidRanking(userId);
     return result;
   }
 }
