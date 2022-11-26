@@ -1,18 +1,11 @@
-import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { RankModule } from 'src/rank/rank.module';
+import { UserModule } from 'src/user/user.module';
 import { RewardService } from './reward.service';
 
 @Module({
-  imports: [
-    RedisModule.forRoot({
-      config: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
-    ScheduleModule.forRoot(),
-  ],
+  imports: [ScheduleModule.forRoot(), UserModule, RankModule],
   providers: [RewardService],
   controllers: [],
 })

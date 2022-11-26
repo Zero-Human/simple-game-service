@@ -1,17 +1,25 @@
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import Redis from 'ioredis';
+import { RankService } from '../rank/rank.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class RewardService {
-  constructor(@InjectRedis() private readonly redis: Redis) {}
-  @Cron(CronExpression.EVERY_10_MINUTES, {
-    name: 'cronTask',
+  constructor(
+    private readonly rankService: RankService,
+    private readonly userService: UserService,
+  ) {}
+  @Cron(CronExpression.EVERY_DAY_AT_2AM, {
     timeZone: 'Asia/Seoul',
   })
   async topRankingReward() {
-    const data = await this.redis.zrevrange('rank', 0, 20, 'WITHSCORES');
-    console.log(`${new Date().getTime()} // ${data}`);
+    const data = await this.rankService.getrankingList(0, 4, true);
+    for (const user of data) {
+      await this.userService.updateUserTotalScore(
+        user.userId,
+        user.totalScore + 100,
+      );
+      await this.rankService.insertRanking(user.totalScore + 100, user.userId);
+    }
   }
 }
