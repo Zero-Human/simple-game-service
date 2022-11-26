@@ -7,6 +7,7 @@ import { MySqlConfigModule } from './config/config.module';
 import { MySqlConfigService } from './config/config.service';
 import { HttpModule } from '@nestjs/axios';
 import { BatchModule } from './batch/batch.module';
+import { RankModule } from './rank/rank.module';
 import * as Joi from 'joi';
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import * as Joi from 'joi';
       inject: [MySqlConfigService],
     }),
     BatchModule,
+    RankModule,
   ],
   controllers: [],
   providers: [],

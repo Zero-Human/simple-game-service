@@ -4,35 +4,32 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { IsNull } from 'typeorm';
 import { BossRaidRepository } from './boss-raid.repository';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
 import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import Redis from 'ioredis';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { RankingInfo } from './interface/ranking-info.interface';
+import { RankService } from '../rank/rank.service';
 
 @Injectable()
 export class BossRaidService {
   private readonly DATA_URL: string;
   private readonly CONERT_SECOND: number;
-  private readonly RANKING_KEY: string;
   private bossRaidLimitSeconds: number;
   private levels: Array<object>;
   constructor(
     @InjectRepository(BossRaidHistory)
     private readonly bossRaidRepository: BossRaidRepository,
     private readonly userService: UserService,
-    @InjectRedis() private readonly redis: Redis,
+    private readonly rankService: RankService,
     private readonly httpService: HttpService,
   ) {
     this.DATA_URL = `https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json`;
     this.CONERT_SECOND = 1000;
-    this.RANKING_KEY = 'rank';
     firstValueFrom(httpService.get(this.DATA_URL)).then((data) => {
       this.bossRaidLimitSeconds = data.data.bossRaids[0].bossRaidLimitSeconds;
       this.levels = data.data.bossRaids[0].levels;
@@ -123,13 +120,7 @@ export class BossRaidService {
         enterUser.user.id,
         totalScore,
       );
-      await this.redis.zadd(
-        this.RANKING_KEY,
-        totalScore,
-        JSON.stringify({
-          userId: enterUser.user.id,
-        }),
-      );
+      await this.rankService.insertRanking(totalScore, enterUser.user.id);
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
@@ -144,38 +135,12 @@ export class BossRaidService {
     if (!user) {
       throw new BadRequestException('없는 유저입니다.');
     }
+    const topRankerInfoList: RankingInfo[] =
+      await this.rankService.getrankingList(0, -1, true);
 
-    const data = await this.redis.zrevrange(
-      this.RANKING_KEY,
-      0,
-      -1,
-      'WITHSCORES',
-    );
-
-    const topRankerInfoList: RankingInfo[] = [];
-    data.filter((value, index) => {
-      const ranking = Math.floor(index / 2);
-      if (index % 2 === 0) {
-        const rankinginfo: RankingInfo = {
-          ranking: ranking,
-          userId: parseInt(JSON.parse(value).userId),
-          totalScore: 0,
-        };
-        topRankerInfoList.push(rankinginfo);
-      } else {
-        topRankerInfoList[ranking].totalScore = parseInt(value);
-      }
-    });
-    const myRankingInfo: RankingInfo = {
-      ranking: await this.redis.zrevrank(
-        this.RANKING_KEY,
-        JSON.stringify({ userId }),
-      ),
+    const myRankingInfo: RankingInfo = await this.rankService.getranking(
       userId,
-      totalScore: parseInt(
-        await this.redis.zscore(this.RANKING_KEY, JSON.stringify({ userId })),
-      ),
-    };
+    );
 
     return { topRankerInfoList, myRankingInfo };
   }

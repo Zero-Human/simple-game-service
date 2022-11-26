@@ -10,8 +10,8 @@ import { BossRaidHistory } from './entity/boss-raid-history.entity';
 import { HttpModule } from '@nestjs/axios';
 import { DataSource } from 'typeorm';
 import { customBossRaidRepositoryMethods } from './boss-raid.repository';
-import { UserModule } from 'src/user/user.module';
-import { RedisModule } from '@liaoliaots/nestjs-redis';
+import { UserModule } from '../user/user.module';
+import { RankModule } from '../rank/rank.module';
 
 const BossRaidRepositoryProvider = {
   provide: getRepositoryToken(BossRaidHistory),
@@ -27,12 +27,7 @@ const BossRaidRepositoryProvider = {
     TypeOrmModule.forFeature([BossRaidHistory]),
     HttpModule,
     UserModule,
-    RedisModule.forRoot({
-      config: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
+    RankModule,
   ],
   providers: [BossRaidService, BossRaidRepositoryProvider],
   controllers: [BossRaidController],
