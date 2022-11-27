@@ -13,6 +13,7 @@ import { EnterBossRaidDto } from './dto/enter-boss-raid.dto';
 import { BossRaidHistory } from './entity/boss-raid-history.entity';
 import { HttpModule } from '@nestjs/axios';
 import { EndBossRaidDto } from './dto/end-boss-raid.dto';
+import { RankService } from 'src/rank/rank.service';
 const qr = {
   manager: { update: jest.fn(), save: jest.fn() },
   connect: jest.fn(),
@@ -91,6 +92,7 @@ describe('BossRaidService', () => {
   let spyRepository: Repository<BossRaidHistory>;
   let spyUserService: UserService;
   let spyRedis: Redis;
+  let spyRankService: RankService;
   beforeEach(async () => {
     qr.startTransaction = jest.fn();
     qr.commitTransaction = jest.fn();
@@ -101,6 +103,7 @@ describe('BossRaidService', () => {
       providers: [
         BossRaidService,
         UserService,
+        RankService,
         {
           provide: getRedisToken(DEFAULT_REDIS_NAMESPACE),
           useFactory: mockRedis,
@@ -119,6 +122,7 @@ describe('BossRaidService', () => {
     service = module.get<BossRaidService>(BossRaidService);
     spyRepository = module.get(getRepositoryToken(BossRaidHistory));
     spyUserService = module.get<UserService>(UserService);
+    spyRankService = module.get<RankService>(RankService);
   });
 
   it('enter() - 성공', async () => {
@@ -189,8 +193,10 @@ describe('BossRaidService', () => {
     spyRepository.findOne = jest.fn(async () => {
       return bossRaidHistory;
     });
+    spyRankService.insertRanking = jest.fn();
 
     const queryRunner = spyRepository.manager.connection.createQueryRunner();
+
     await service.endBossRaid(endBossRaidDto);
 
     expect(spyRepository.findOne).toHaveBeenCalled();
@@ -198,6 +204,11 @@ describe('BossRaidService', () => {
       where: { raidRecordId: endBossRaidDto.raidRecordId, endTime: IsNull() },
       relations: ['user'],
     });
+    expect(spyRankService.insertRanking).toHaveBeenCalled();
+    expect(spyRankService.insertRanking).toHaveBeenCalledWith(
+      user.totalScore + 47,
+      user.id,
+    );
     expect(queryRunner.connect).toHaveBeenCalled();
     expect(queryRunner.startTransaction).toHaveBeenCalled();
     expect(queryRunner.manager.update).toHaveBeenCalled();
@@ -207,25 +218,49 @@ describe('BossRaidService', () => {
 
   it('getBossRaidRanking() - 성공', async () => {
     const userId = 1;
+    spyRankService.getrankingList = jest.fn(async () => {
+      return [
+        {
+          ranking: 0,
+          userId: 3,
+          totalScore: 132,
+        },
+        {
+          ranking: 1,
+          userId: 5,
+          totalScore: 132,
+        },
+        {
+          ranking: 2,
+          userId: 1,
+          totalScore: 132,
+        },
+        {
+          ranking: 3,
+          userId: 4,
+          totalScore: 85,
+        },
+        {
+          ranking: 4,
+          userId: 2,
+          totalScore: 85,
+        },
+      ];
+    });
+    spyRankService.getranking = jest.fn(async () => {
+      return {
+        ranking: 2,
+        userId: 1,
+        totalScore: 132,
+      };
+    });
+
     const result = await service.getBossRaidRanking(userId);
 
-    expect(spyRedis.zrevrange).toHaveBeenCalled();
-    expect(spyRedis.zrevrange).toHaveBeenCalledWith(
-      'rank',
-      0,
-      -1,
-      'WITHSCORES',
-    );
-    expect(spyRedis.zrevrank).toHaveBeenCalled();
-    expect(spyRedis.zrevrank).toHaveBeenCalledWith(
-      'rank',
-      JSON.stringify({ userId }),
-    );
-    expect(spyRedis.zscore).toHaveBeenCalled();
-    expect(spyRedis.zscore).toHaveBeenCalledWith(
-      'rank',
-      JSON.stringify({ userId }),
-    );
+    expect(spyRankService.getrankingList).toHaveBeenCalled();
+    expect(spyRankService.getrankingList).toHaveBeenCalledWith(0, -1, true);
+    expect(spyRankService.getranking).toHaveBeenCalled();
+    expect(spyRankService.getranking).toHaveBeenCalledWith(userId);
     expect(result).toEqual({
       topRankerInfoList: [
         {

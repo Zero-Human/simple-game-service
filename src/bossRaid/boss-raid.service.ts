@@ -14,6 +14,8 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { RankingInfo } from './interface/ranking-info.interface';
 import { RankService } from '../rank/rank.service';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class BossRaidService {
@@ -27,6 +29,7 @@ export class BossRaidService {
     private readonly bossRaidRepository: Repository<BossRaidHistory>,
     private readonly userService: UserService,
     private readonly rankService: RankService,
+    @InjectRedis() private readonly redis: Redis,
     private readonly httpService: HttpService,
   ) {
     this.DATA_URL = `https://dmpilf5svl7rv.cloudfront.net/assignment/backend/bossRaidData.json`;

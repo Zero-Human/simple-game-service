@@ -11,6 +11,7 @@ import { HttpModule } from '@nestjs/axios';
 import { DataSource } from 'typeorm';
 import { UserModule } from '../user/user.module';
 import { RankModule } from '../rank/rank.module';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 
 const BossRaidRepositoryProvider = {
   provide: getRepositoryToken(BossRaidHistory),
@@ -22,6 +23,12 @@ const BossRaidRepositoryProvider = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([BossRaidHistory]),
+    RedisModule.forRoot({
+      config: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     HttpModule,
     UserModule,
     RankModule,

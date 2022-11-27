@@ -314,7 +314,7 @@ describe('AppController (e2e)', () => {
         myRankingInfo: { ranking: 0, userId: 1, totalScore: 100 },
       });
   });
-  it('/bossRaid/topRankerList (GET) - 성공', async () => {
+  it('/bossRaid/topRankerList (GET) - 실패 해당 유저가 없는 경우', async () => {
     return request(app.getHttpServer())
       .get('/bossRaid/topRankerList')
       .send({ userId: 1 })
